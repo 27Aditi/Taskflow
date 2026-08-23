@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TaskFlow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/assets/style.css" />
+</head>
+<body>
+
+<div id="toast-holder"></div>
+
+<div id="auth-screen" class="screen">
+  <div class="auth-wrap">
+    <div class="brand-block">
+      <div class="brand-mark">TF</div>
+      <h1>TaskFlow</h1>
+      <p class="brand-tag">Boards, tasks, and teammates — kept in sync.</p>
+    </div>
+
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Log in</button>
+        <button class="auth-tab" data-tab="signup">Sign up</button>
+      </div>
+
+      <form id="login-form" class="auth-form active">
+        <label>Email
+          <input type="email" id="login-email" required placeholder="you@example.com" />
+        </label>
+        <label>Password
+          <input type="password" id="login-password" required placeholder="••••••••" />
+        </label>
+        <button type="submit" class="btn-primary">Log in</button>
+        <p class="form-error" id="login-error"></p>
+      </form>
+
+      <form id="signup-form" class="auth-form">
+        <label>Username
+          <input type="text" id="signup-username" required placeholder="jane_doe" />
+        </label>
+        <label>Email
+          <input type="email" id="signup-email" required placeholder="you@example.com" />
+        </label>
+        <label>Password
+          <input type="password" id="signup-password" required placeholder="min. 6 characters" />
+        </label>
+        <button type="submit" class="btn-primary">Create account</button>
+        <p class="form-error" id="signup-error"></p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div id="app-screen" class="screen">
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="brand-mark small">TF</div>
+      <span class="sidebar-title">TaskFlow</span>
+    </div>
+
+    <div class="sidebar-section-label">Boards</div>
+    <div id="board-list" class="board-list"></div>
+
+    <button id="new-board-btn" class="btn-ghost">+ New board</button>
+
+    <div class="sidebar-bottom">
+      <div class="user-chip">
+        <div class="avatar" id="user-avatar"></div>
+        <span id="user-name"></span>
+      </div>
+      <button id="logout-btn" class="btn-text">Log out</button>
+    </div>
+  </aside>
+
+  <main class="main-panel">
+    <div id="empty-state" class="empty-state">
+      <div class="empty-glyph">⌘</div>
+      <h2>No board selected</h2>
+      <p>Pick a board from the left, or create a new one to get started.</p>
+    </div>
+
+    <div id="board-view" class="board-view hidden">
+      <header class="board-header">
+        <div>
+          <h2 id="board-title"></h2>
+          <p id="board-desc" class="board-desc"></p>
+        </div>
+        <div class="board-actions">
+          <button id="invite-btn" class="btn-secondary">Invite</button>
+          <button id="add-task-btn" class="btn-primary">+ Add task</button>
+        </div>
+      </header>
+
+      <div class="columns">
+        <div class="column" data-status="todo">
+          <div class="column-head">
+            <span class="dot dot-todo"></span>To do
+            <span class="count" id="count-todo">0</span>
+          </div>
+          <div class="task-list" id="list-todo"></div>
+        </div>
+        <div class="column" data-status="in_progress">
+          <div class="column-head">
+            <span class="dot dot-progress"></span>In progress
+            <span class="count" id="count-in_progress">0</span>
+          </div>
+          <div class="task-list" id="list-in_progress"></div>
+        </div>
+        <div class="column" data-status="done">
+          <div class="column-head">
+            <span class="dot dot-done"></span>Done
+            <span class="count" id="count-done">0</span>
+          </div>
+          <div class="task-list" id="list-done"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="modal-backdrop" class="modal-backdrop hidden">
+  <div class="modal" id="board-modal">
+    <h3>Create a board</h3>
+    <label>Board name
+      <input type="text" id="board-name-input" placeholder="e.g. Q3 Platform Migration" />
+    </label>
+    <label>Description
+      <input type="text" id="board-desc-input" placeholder="Optional" />
+    </label>
+    <div class="modal-actions">
+      <button class="btn-text" data-close-modal="board-modal">Cancel</button>
+      <button class="btn-primary" id="board-modal-submit">Create</button>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="task-modal">
+    <h3 id="task-modal-title">New task</h3>
+    <label>Title
+      <input type="text" id="task-title-input" placeholder="e.g. Wire up auth middleware" />
+    </label>
+    <label>Description
+      <textarea id="task-desc-input" rows="3" placeholder="Optional details"></textarea>
+    </label>
+    <label>Assign to
+      <select id="task-assignee-input">
+        <option value="">Unassigned</option>
+      </select>
+    </label>
+    <label>Status
+      <select id="task-status-input">
+        <option value="todo">To do</option>
+        <option value="in_progress">In progress</option>
+        <option value="done">Done</option>
+      </select>
+    </label>
+    <div class="modal-actions">
+      <button class="btn-text" id="task-delete-btn">Delete</button>
+      <div class="modal-actions-right">
+        <button class="btn-text" data-close-modal="task-modal">Cancel</button>
+        <button class="btn-primary" id="task-modal-submit">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="invite-modal">
+    <h3>Invite a teammate</h3>
+    <label>Email address
+      <input type="email" id="invite-email-input" placeholder="teammate@example.com" />
+    </label>
+    <p class="hint">They need an existing TaskFlow account.</p>
+    <div class="modal-actions">
+      <button class="btn-text" data-close-modal="invite-modal">Cancel</button>
+      <button class="btn-primary" id="invite-modal-submit">Send invite</button>
+    </div>
+  </div>
+</div>
+
+<script src="/assets/app.js"></script>
+</body>
+</html>
